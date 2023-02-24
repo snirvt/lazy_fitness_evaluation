@@ -11,9 +11,10 @@ import array
 import random
 
 from evolution_helper import xover, mutation
-from utils import generate_distances
+from utils import generate_distances, make_dir
 from fitness_handler import evalTSP, evalTSP_lazy
 from schedulers import step_scheduler, linear_scheduler
+
 import argparse
 
 
@@ -29,7 +30,7 @@ argparser.add_argument('--mutpb', type=float, default=1.0, help='mutation percen
 argparser.add_argument('--tournsize', type=int, default=3, help='tournament size')
 argparser.add_argument('--n_fitness_calls', type=int, default=100000, help='max fitness calls')
 argparser.add_argument('--novelty_param', type=int, default=1, help='')
-argparser.add_argument('--scheduler', choices=['step_scheduler', 'linear_scheduler'], default=step_scheduler, help='')
+argparser.add_argument('--scheduler', choices=['step_scheduler', 'linear_scheduler'], default='step_scheduler', help='')
 argparser.add_argument('--points', type=list, default=[(0, 0.8),(0.2, 1)], help='scheduler function argument')
 argparser.add_argument('--verbos', type=bool, default=False, help='scheduler function argument')
 argparser.add_argument('--repetitions', type=int, default=3, help='how many repetitions to the experiment')
@@ -63,11 +64,17 @@ creator.create("Individual", array.array, typecode='i', fitness=creator.FitnessM
 toolbox.register("individual", tools.initIterate, creator.Individual, toolbox.indices)
 toolbox.register("population", tools.initRepeat, list, toolbox.individual)
 toolbox.register("mate", tools.cxPartialyMatched)
-toolbox.register("mutate", tools.mutShuffleIndexes, indpb=1 / INDIVIDUAL_SIZE)
+toolbox.register("mutate", tools.mutShuffleIndexes, indpb= 1 / INDIVIDUAL_SIZE)
 toolbox.register("select", tools.selTournament, tournsize=tournsize)
+exp_name = args.__str__()
 
+try:
+    data = np.load('results/data.npy', allow_pickle=True).item()
+except:
+    data = {}
 
 for n in range(repetitions):
+    data[n] = {}
     distances = generate_distances(NUM_CITIES)
     toolbox.register("evaluate", evalTSP_lazy, distances=distances, p=1)
     pop = toolbox.population(n=POPULATION_SIZE)
@@ -118,4 +125,8 @@ for n in range(repetitions):
         log.append(gen_stats)
 
     best_ind = tools.selBest(pop, 1)[0]
-    print("Best individual is %s, %s" % (best_ind, best_ind.fitness.values))
+    data[exp_name,n]={'log': log, 'best_ind_fitness': best_ind.fitness.values, 'best_ind': best_ind}
+    # print("Best individual is %s, %s" % (best_ind, best_ind.fitness.values))
+
+argparser_dir = make_dir('results/')
+np.save(argparser_dir + 'data.npy', data, allow_pickle=True)
