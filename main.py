@@ -26,20 +26,14 @@ argparser.add_argument('--INDIVIDUAL_SIZE', type=int, default=20, help='')
 argparser.add_argument('--POPULATION_SIZE', type=int, default=100, help='')
 argparser.add_argument('--cxpb', type=float, default=0.1, help='cross over percentage')
 argparser.add_argument('--mutpb', type=float, default=1.0, help='mutation percentage')
+argparser.add_argument('--tournsize', type=int, default=3, help='tournament size')
 argparser.add_argument('--n_fitness_calls', type=int, default=100000, help='max fitness calls')
 argparser.add_argument('--novelty_param', type=int, default=1, help='')
 argparser.add_argument('--scheduler', choices=['step_scheduler', 'linear_scheduler'], default=step_scheduler, help='')
 argparser.add_argument('--points', type=list, default=[(0, 0.8),(0.2, 1)], help='scheduler function argument')
 argparser.add_argument('--verbos', type=bool, default=False, help='scheduler function argument')
-
 # argparser.add_argument('--points', type=list, default=[(0, 1),(1, 1)], help='scheduler function argument')
-
 args, unknown = argparser.parse_known_args()
-
-
-
-
-
 
 
 
@@ -57,9 +51,6 @@ if args.scheduler == 'linear_scheduler':
     scheduler = linear_scheduler
 
 points = args.points
-
-
-
 distances = generate_distances(NUM_CITIES)
 
 toolbox = base.Toolbox()
