@@ -10,6 +10,7 @@ from deap import algorithms, base, creator, tools
 import array
 import random
 
+from evolution_helper import xover, mutation
 from utils import generate_distances
 from fitness_handler import evalTSP, evalTSP_lazy
 from schedulers import step_scheduler, linear_scheduler
@@ -54,6 +55,8 @@ if args.scheduler == 'linear_scheduler':
 
 points = args.points
 
+
+
 distances = generate_distances(NUM_CITIES)
 
 toolbox = base.Toolbox()
@@ -85,33 +88,17 @@ for ind, fit in zip(pop, fitnesses):
     f_call += p
     ind.fitness.values = fit
 hof.update(pop)
-print("  Evaluated %i individuals" % len(pop))
-
-# Extracting all the fitnesses of
 fits = [ind.fitness.values[0] for ind in pop]
-# Variable keeping track of the number of generations
 g = 0
-# Begin the evolutions
 log = []
-# while g < ngen:
 while f_call < n_fitness_calls:
     g = g + 1
+    print(f"-- Generation {g}, p {p}--")
     offspring = toolbox.select(pop, len(pop))
     offspring = list(map(toolbox.clone, offspring))
     hof.update(offspring)
-    for child1, child2 in zip(offspring[::2], offspring[1::2]): # Apply crossover and mutation on the offspring
-        if random.random() < cxpb:# cross two individuals with probability CXPB
-            toolbox.mate(child1, child2) # fitness values of the children must be recalculated later
-            del child1.fitness.values
-            del child2.fitness.values
-
-    for mutant in offspring:
-        # mutate an individual with probability MUTPB
-        if random.random() < mutpb:
-            toolbox.mutate(mutant)
-            del mutant.fitness.values
-    # Evaluate the individuals with an invalid fitness
-
+    xover(offspring, cxpb, toolbox)
+    mutation(offspring, mutpb, toolbox)
     if novelty_param > 0:
         pop[:novelty_param] = hof.items[:]
     p = scheduler(f_call, n_fitness_calls, points)
@@ -123,19 +110,17 @@ while f_call < n_fitness_calls:
         if f_call > n_fitness_calls:
             break
         ind.fitness.values = fit
-    print("  Evaluated %i individuals" % len(invalid_ind))
-    # The population is entirely replaced by the offspring
     pop[:] = offspring
     if novelty_param > 0:
         pop[:novelty_param] = hof.items[:]
-    # Gather all the fitnesses in one list and print the stats
     valid_ind = [ind for ind in offspring if ind.fitness.valid]
     fits = [ind.fitness.values[0] for ind in valid_ind]
     gen_stats = {'mean': np.mean(fits), 'std': np.std(fits), 'min': min(fits), 'max': max(fits)}
     log.append(gen_stats)
 
 
-
+best_ind = tools.selBest(pop, 1)[0]
+print("Best individual is %s, %s" % (best_ind, best_ind.fitness.values))
 toolbox.register("evaluate", evalTSP, distances=distances)
 fitnesses = list(map(toolbox.evaluate, pop))
 for ind, fit in zip(pop, fitnesses):
