@@ -9,11 +9,11 @@ will return 0.7, and then ratio equal to 1 will return 1
 '''
 
 def step_scheduler(f_call, n_fitness_calls, points):
-    points += [(1, 1)]
+    P_points = points + [(1, 1)]
     ratio = f_call / n_fitness_calls
-    for i in range(len(points)-1):
-        if ratio < points[i+1][0]:
-            return points[i][1]
+    for i in range(len(P_points)-1):
+        if ratio < P_points[i+1][0]:
+            return P_points[i][1]
     return 1
 
 
@@ -23,13 +23,13 @@ The points parameter is a list of tuples where each tuple represent a ratio (fir
 corresponding fitness percentage (last value).
 '''
 def linear_scheduler(f_call, n_fitness_calls, points):
-    points += [(1,1)]
+    P_points = points + [(1, 1)]
     ratio = f_call/n_fitness_calls
     # Find the two points that ratio falls between
     left_point, right_point = None, None
-    for i in range(len(points) - 1):
-        if points[i][0] <= ratio <= points[i + 1][0]:
-            left_point, right_point = points[i], points[i + 1]
+    for i in range(len(P_points) - 1):
+        if points[i][0] <= ratio <= P_points[i + 1][0]:
+            left_point, right_point = P_points[i], P_points[i + 1]
             break
     # Calculate the slope and y-intercept of the line between the two points
     slope = (right_point[1] - left_point[1]) / (right_point[0] - left_point[0])
