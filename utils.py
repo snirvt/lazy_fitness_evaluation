@@ -22,3 +22,6 @@ def make_dir(directory_name):
     if directory_name[-1] != '/':
         directory_name = directory_name + '/'
     return directory_name
+
+def empty_list():
+    return []
