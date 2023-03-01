@@ -29,6 +29,8 @@ argparser.add_argument('--POPULATION_SIZE', type=int, default=100, help='')
 argparser.add_argument('--cxpb', type=float, default=0.1, help='cross over percentage')
 argparser.add_argument('--mutpb', type=float, default=1.0, help='mutation percentage')
 argparser.add_argument('--tournsize', type=int, default=2, help='tournament size')
+argparser.add_argument('--random_size', type=float, default=0.1, help='percentage of random parents')
+
 argparser.add_argument('--n_fitness_calls', type=int, default=500, help='max fitness calls')
 argparser.add_argument('--novelty_param', type=int, default=1, help='')
 argparser.add_argument('--scheduler', choices=['step_scheduler', 'linear_scheduler'], default='step_scheduler', help='')
@@ -38,6 +40,7 @@ argparser.add_argument('--points', type=list, default=[(0, 1), (1, 1)], help='sc
 argparser.add_argument('--verbos', type=bool, default=False, help='scheduler function argument')
 argparser.add_argument('--repetitions', type=int, default=100, help='how many repetitions to the experiment')
 argparser.add_argument('--inner_repetitions', type=int, default=10, help='how many repetitions to the experiment')
+
 args, unknown = argparser.parse_known_args()
 
 
@@ -49,6 +52,7 @@ POPULATION_SIZE = args.POPULATION_SIZE  # Number of individuals in the populatio
 cxpb = args.cxpb  # Probability of performing crossover on an individual
 mutpb = args.mutpb  # Probability of mutating an individual
 tournsize = args.tournsize
+random_size = int(args.random_size * INDIVIDUAL_SIZE)
 n_fitness_calls = args.n_fitness_calls
 novelty_param = args.novelty_param
 
@@ -69,6 +73,8 @@ toolbox.register("population", tools.initRepeat, list, toolbox.individual)
 toolbox.register("mate", tools.cxPartialyMatched)
 toolbox.register("mutate", tools.mutShuffleIndexes, indpb= 1 / INDIVIDUAL_SIZE)
 toolbox.register("select", tools.selTournament, tournsize=tournsize)
+toolbox.register("rand_select", tools.selRandom)
+
 exp_name = str(args._get_kwargs())  #args.__str__()
 
 try:
@@ -101,6 +107,8 @@ for n in range(repetitions):
             if args.verbos:
                 print(f"-- Generation {g}, p {p}--")
             offspring = toolbox.select(pop, len(pop))
+            rand_offspring = toolbox.rand_select(pop, random_size)
+            offspring[-random_size:] = rand_offspring
             offspring = list(map(toolbox.clone, offspring))
             hof.update(offspring)
             xover(offspring, cxpb, toolbox)
