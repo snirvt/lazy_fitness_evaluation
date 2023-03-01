@@ -5,7 +5,8 @@ import random
 import os
 
 
-def generate_distances(NUM_CITIES):
+def generate_distances(NUM_CITIES, seed=None):
+    random.seed(seed)
     distances = np.zeros((NUM_CITIES, NUM_CITIES))
     for city in range(NUM_CITIES):
         for to_city in range(city+1, NUM_CITIES):
