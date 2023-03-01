@@ -33,7 +33,7 @@ argparser.add_argument('--n_fitness_calls', type=int, default=500, help='max fit
 argparser.add_argument('--novelty_param', type=int, default=1, help='')
 argparser.add_argument('--scheduler', choices=['step_scheduler', 'linear_scheduler'], default='step_scheduler', help='')
 # argparser.add_argument('--points', type=list, default=[(0, 0.65), (0.15, 0.75), (0.3, 0.85), (0.4, 1)], help='scheduler function argument')
-# argparser.add_argument('--points', type=list, default=[(0, 0.65), (0.15, 0.75), (0.3, 0.85), (0.4, 1)], help='scheduler function argument')
+# argparser.add_argument('--points', type=list, default=[(0, 0.65), (0.399, 1), (0.4, 1)], help='scheduler function argument')
 argparser.add_argument('--points', type=list, default=[(0, 1), (1, 1)], help='scheduler function argument')
 argparser.add_argument('--verbos', type=bool, default=False, help='scheduler function argument')
 argparser.add_argument('--repetitions', type=int, default=100, help='how many repetitions to the experiment')
@@ -81,7 +81,6 @@ for n in range(repetitions):
     for m in range(inner_reptitions):
         distances = generate_distances(NUM_CITIES, n)
         random.seed(None)
-        toolbox.register("evaluate", evalTSP_lazy, distances=distances, p=1)
         pop = toolbox.population(n=POPULATION_SIZE)
         f_call = 0
         p = scheduler(f_call, n_fitness_calls, points)
@@ -121,11 +120,11 @@ for n in range(repetitions):
                     break
                 ind.fitness.values = fit
             pop[:] = offspring
-            valid_ind = [ind for ind in offspring if ind.fitness.valid]
-            fits = [ind.fitness.values[0] for ind in valid_ind]
-            gen_stats = {'mean': np.mean(fits), 'std': np.std(fits), 'min': min(fits), 'max': max(fits), 'p': p}
+            # valid_ind = [ind for ind in offspring if ind.fitness.valid]
+            # fits = [ind.fitness.values[0] for ind in valid_ind]
+            # gen_stats = {'mean': np.mean(fits), 'std': np.std(fits), 'min': min(fits), 'max': max(fits), 'p': p}
             # log.append(gen_stats)
-
+        # print(f_call)
         best_ind = tools.selBest(pop, 1)[0]
         inner_results.append(best_ind.fitness.values[0])
         # data[exp_name,n]={'log': log, 'best_ind_fitness': best_ind.fitness.values, 'best_ind': best_ind}
@@ -133,3 +132,10 @@ for n in range(repetitions):
 
 argparser_dir = make_dir('results/')
 np.save(argparser_dir + 'data.npy', data, allow_pickle=True)
+
+
+
+
+
+
+
